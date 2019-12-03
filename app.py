@@ -65,18 +65,21 @@ class Recommender:
 
 
 '''ratings = pd.read_csv('./data/train_ratings_binary.csv')
-voting = collections.defaultdict(list)
+voting = collections.defaultdict(set)
 for i in range(len(ratings)):
     uid = ratings.iloc[i]['userId']
     movieid = ratings.iloc[i]['movieId']
     label = ratings.iloc[i]['rating']
     if label == 1:
-        voting[uid].append(movieid)
-        print(uid,movieid)'''
-
+        voting[uid].add(movieid)
+        print(uid,movieid)
+with open('dict.pickle', 'wb') as handle:
+    pickle.dump(voting, handle, protocol=pickle.HIGHEST_PROTOCOL)
+print("writing complete")'''
 with open('dict.pickle', 'rb') as handle:
     voting = pickle.load(handle)
 
+rows = []
 with open("data/result.csv","w", newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Id","rating"])
@@ -84,23 +87,26 @@ with open("data/result.csv","w", newline='') as csvfile:
     r = Recommender()
     movie_map = r.movie_map
     testset = pd.read_csv('./data/test_ratings.csv')
-    for i in range(len(testset)):
+    for i in range(2299491, len(testset)):
         uid = testset.iloc[i]['userId']
         movieid = testset.iloc[i]['movieId']
-        if uid != 27:
-            res = r.get_all_recommendationsbyid(movieid, 20)
-        else:
+        try:
+            res = r.get_all_recommendationsbyid(movieid, 10)
+        except ValueError:
             res = None
-        sum = 0
+        pred = 0.0
         if res is not None:
-            print(uid, r.imap[movieid])
             for name in res['hybrid']['hybrid']:
                 if movie_map[name] in voting[uid]:
-                    sum = sum + 1
-        pred = 0.0
-        if sum >= 1:
-            pred = 1.0
-        writer.writerow([i, pred])
+                    pred = 1.0
+
+        rows.append([i, pred])
+        if i%10000 == 0 or i == len(testset)-1:
+            print("we have write ", i)
+            writer.writerows(rows)
+            rows=[]
+
+
 
 
 
