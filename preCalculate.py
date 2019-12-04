@@ -52,9 +52,9 @@ if len(sys.argv) >= i+1 and sys.argv == "-SE":
 # uses collab feat
 if len(sys.argv) >= i+2 and sys.argv[i] == "-collab":
 	if SE_distance:
-		collab__sim = pre_calculate_se_sim(sys.argv[i+1])
+		collab_sim = pre_calculate_se_sim(sys.argv[i+1])
 	else:
-		collab__sim = pre_calculate_cosine_sim(sys.argv[i+1])
+		collab_sim = pre_calculate_cosine_sim(sys.argv[i+1])
 	# outFile = open("collabSim.npy", "wb")
 	# np.save(outFile, collab_cosine_sim)
 	i += 2
@@ -63,9 +63,9 @@ if len(sys.argv) >= i+2 and sys.argv[i] == "-collab":
 # uses content feat
 if len(sys.argv) >= i+2 and sys.argv[i] == "-content":
 	if SE_distance:
-		content__sim = pre_calculate_se_sim(sys.argv[i+1])
+		content_sim = pre_calculate_se_sim(sys.argv[i+1])
 	else:
-		content__sim = pre_calculate_cosine_sim(sys.argv[i+1])
+		content_sim = pre_calculate_cosine_sim(sys.argv[i+1])
 	# outFile = open("contentSim.npy", "wb")
 	# np.save(outFile, content_cosine_sim)
 	i += 2
@@ -76,7 +76,7 @@ if len(sys.argv) >= i+2 and sys.argv[i] == "-content":
 sim = None
 if collab_sim is None:
 	sim = content_sim
-elif content_cosine_sim is None:
+elif content_sim is None:
 	sim = collab_sim
 else:
 	sim = content_sim + collab_sim
