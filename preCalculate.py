@@ -13,6 +13,7 @@ def pre_calculate_cosine_sim(fileP):
 	data = None
 	with open(fileP, 'rb') as f:
 		data = pickle.load(f)
+	print("data size:", data.shape)
 	if data is not None:
 		data_sim = cosine_similarity(data, data)
 	else:
@@ -24,8 +25,9 @@ def pre_calculate_se_sim(fileP):
 	data = None
 	with open(fileP, 'rb') as f:
 		data = pickle.load(f)
+	print("data size:", data.shape)
 	if data is not None:
-		data_sim = euclidean_distances(data, data)
+		data_sim = -euclidean_distances(data, data)
 	else:
 		print("No collaborative pkl file!")
 	return data_sim
@@ -80,7 +82,7 @@ if collab_sim is None:
 elif content_sim is None:
 	sim = collab_sim
 else:
-	sim = content_sim + collab_sim * 0.1
+	sim = content_sim + collab_sim * 0.2
 
 nLarge = pre_calculate_n_largest(sim, 10)
 outFile = open("nLarge.npy", "wb")
