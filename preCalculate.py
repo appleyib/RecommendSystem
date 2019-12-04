@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import euclidean_distances
 from scipy.spatial import distance
 
 index = None
@@ -24,7 +25,7 @@ def pre_calculate_se_sim(fileP):
 	with open(fileP, 'rb') as f:
 		data = pickle.load(f)
 	if data is not None:
-		data_sim = distance.euclidean(data, data)
+		data_sim = euclidean_distances(data, data)
 	else:
 		print("No collaborative pkl file!")
 	return data_sim
@@ -39,12 +40,12 @@ def pre_calculate_n_largest(data, n):
 
 # sets up variables
 i=1
-collab_cosine_sim = None
-content_cosine_sim = None
+collab_sim = None
+content_sim = None
 # flag whether we should use squared error distance
 SE_distance = False
 
-if len(sys.argv) >= i+1 and sys.argv == "-SE":
+if len(sys.argv) >= i+1 and sys.argv[i] == "-SE":
 	SE_distance = True
 	i += 1
 
@@ -58,7 +59,7 @@ if len(sys.argv) >= i+2 and sys.argv[i] == "-collab":
 	# outFile = open("collabSim.npy", "wb")
 	# np.save(outFile, collab_cosine_sim)
 	i += 2
-	print("Collab consine cosine_similarity calculation complete!")
+	print("Collab similarity calculation complete!")
 
 # uses content feat
 if len(sys.argv) >= i+2 and sys.argv[i] == "-content":
@@ -69,7 +70,7 @@ if len(sys.argv) >= i+2 and sys.argv[i] == "-content":
 	# outFile = open("contentSim.npy", "wb")
 	# np.save(outFile, content_cosine_sim)
 	i += 2
-	print("Content consine cosine_similarity calculation complete!")
+	print("Content similarity calculation complete!")
 
 
 # the variable to store the final similarity
@@ -79,7 +80,7 @@ if collab_sim is None:
 elif content_sim is None:
 	sim = collab_sim
 else:
-	sim = content_sim + collab_sim
+	sim = content_sim + collab_sim * 0.1
 
 nLarge = pre_calculate_n_largest(sim, 10)
 outFile = open("nLarge.npy", "wb")

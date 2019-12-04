@@ -12,7 +12,7 @@ def movieid2matrixid(movieid, movieid2name, name2matrixid):
         return None
 
 
-with open('./Files/map.pkl', 'rb') as f:
+with open('./Files/map_20.pkl', 'rb') as f:
     movie_map = pickle.load(f)
 
 
@@ -52,7 +52,7 @@ with open("data/result.csv","w", newline='') as csvfile:
                 name = matrixid2moviename[mid]
                 if name in voting[uid]:
                     pred = 1.0
-                    
+
 
         rows.append([i, pred])
         if i%10000 == 0 or i == len(testset)-1:
