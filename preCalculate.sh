@@ -1,0 +1,1 @@
+python preCalculate.py -collab latent_collaborative.pkl -content latent_content.pkl
