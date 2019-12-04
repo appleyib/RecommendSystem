@@ -5,20 +5,6 @@ from Model import ContentBased, CollabBased, HybridBased, ModelBased
 import pandas as pd
 import csv
 
-
-'''ratings = pd.read_csv('./data/train_ratings_binary.csv')
-voting = collections.defaultdict(set)
-for i in range(len(ratings)):
-    uid = ratings.iloc[i]['userId']
-    movieid = ratings.iloc[i]['movieId']
-    label = ratings.iloc[i]['rating']
-    if label == 1:
-        voting[uid].add(movieid)
-        print(uid,movieid)
-with open('dict.pickle', 'wb') as handle:
-    pickle.dump(voting, handle, protocol=pickle.HIGHEST_PROTOCOL)
-print("writing complete")'''
-
 def movieid2matrixid(movieid, movieid2name, name2matrixid):
     if movieid in movieid2name:
         return name2matrixid[movieid2name[movieid]]
@@ -64,8 +50,9 @@ with open("data/result.csv","w", newline='') as csvfile:
         if matrixid is not None:
             for mid in nLarge[matrixid]:
                 name = matrixid2moviename[mid]
-                if mid in voting[uid]:
+                if name in voting[uid]:
                     pred = 1.0
+                    
 
         rows.append([i, pred])
         if i%10000 == 0 or i == len(testset)-1:
