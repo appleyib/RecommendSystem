@@ -6,9 +6,14 @@ from sklearn.decomposition import TruncatedSVD
 latent_feats_file_name = "latent_feats.npy"
 assembled_feats_file_name = "assembled_feats.npy"
 
+# the function to reduce the dimensionality of content feats
+def reduceContentFeats(mov_fea, cont_feat_num):
+	svd = TruncatedSVD(n_components=cont_feat_num, algorithm="arpack")
+	return svd.fit_transform(mov_fea)
+
 # the function to assemble extended movies features by adding collab feats generating from SVD/PCA
 def assembleFeats(df_movie, df_train, mov_fea, collab_feat_num):
-	df_train = df_train.groupby("userId").filter(lambda x: len(x) >= 70)
+	df_train = df_train.groupby("userId").filter(lambda x: len(x) >= 100)
 	movie_num = mov_fea.shape[0]
 	tags_num = mov_fea.shape[1]
 	collabFeats = np.zeros((movie_num, collab_feat_num))
@@ -27,7 +32,7 @@ def assembleFeats(df_movie, df_train, mov_fea, collab_feat_num):
 	all_latent_feats_include_non_rated = pd.merge(df_movie['movieId'], latent_collab_feats, left_on='movieId', right_index=True, how='left').fillna(0).to_numpy(dtype='float')
 	print("Tag feats shape is:", mov_fea.shape)
 	print("Latent collab feats shape is:", all_latent_feats_include_non_rated.shape)
-	print(all_latent_feats_include_non_rated)
+	# print(all_latent_feats_include_non_rated)
 	np.save(latent_feats_file_name, all_latent_feats_include_non_rated)
 	# assembles!
 	assembledFeats = np.concatenate((mov_fea, all_latent_feats_include_non_rated), axis = 1)

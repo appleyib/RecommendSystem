@@ -9,20 +9,24 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
-from assembleFeats import assembleFeats
+from assembleFeats import assembleFeats, reduceContentFeats
 
 l = len(sys.argv)
 collab_feat_num = None
+cont_feat_num = None
 
 # parses arguments
 for i in range(1,len(sys.argv)):
     if sys.argv[i] == "-cfn":
         collab_feat_num = int(sys.argv[i+1])
+    elif sys.argv[i] == "-contn":
+        cont_feat_num = int(sys.argv[i+1])
 
 # movie nums
 movie_num = 27278
 tags_num = 1128
-user_num = 138493
+# user_num = 138493
+user_num = 1000
 
 # loads files
 print("Loading files...")
@@ -58,15 +62,27 @@ with open('data/train_ratings_binary.csv') as csvfile:
     df_train = pd.read_csv(csvfile)
 
 # test data
-with open('data/test_ratings.csv') as csvfile:
+# with open('data/test_ratings.csv') as csvfile:
+with open('data/val_ratings_binary.csv') as csvfile:
     df_val = pd.read_csv(csvfile)  
 
-# adds collaborative features decomposed by PCA/SVD
 print("Loading file complete, now generating/assembling feats...")
+
+# uses SVD tu reduce the dimensionality of content feats (mov_fea)
+if cont_feat_num is None:
+    print("Running in non-SVD reduction mode, content feats dimensionality will not be reduced.")
+else:
+    mov_fea = reduceContentFeats(mov_fea, cont_feat_num)
+    print("SVD/PCA on content feats done!")
+
+# adds collaborative features decomposed by PCA/SVD
+
 if collab_feat_num is None:
     print("Running in non-collaborative filtering mode, collab feats will not be assembled.")
 else:
     mov_fea = assembleFeats(df_movie, df_train, mov_fea, collab_feat_num)
+    print("Assembling feats done!")
+
 
 # starts to training a classifier for each user
 # will predict for samples in the test case as well since
@@ -82,7 +98,7 @@ for n in range(1,user_num+1):
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=5)
-    clf = RandomForestClassifier(max_depth=5, n_estimators=20)
+    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
     clf.fit(X, y) 
     
 
@@ -91,9 +107,9 @@ for n in range(1,user_num+1):
     if n%100 ==0:
         print(n)
  
-#truth = df_val.to_numpy(dtype='float')[0:final.shape[0],2]
-#fpr, tpr, thresholds = metrics.roc_curve(truth, final)
-#print(metrics.auc(fpr, tpr))  
+truth = df_val.to_numpy(dtype='float')[0:final.shape[0],2]
+fpr, tpr, thresholds = metrics.roc_curve(truth, final)
+print(metrics.auc(fpr, tpr))  
 
 with open('data/kaggle_sample_submission.csv') as csvfile:
     df_res = pd.read_csv(csvfile)
