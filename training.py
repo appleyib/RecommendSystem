@@ -25,8 +25,8 @@ for i in range(1,len(sys.argv)):
 # movie nums
 movie_num = 27278
 tags_num = 1128
-# user_num = 138493
-user_num = 1000
+user_num = 138493
+# user_num = 1000
 
 # loads files
 print("Loading files...")
@@ -96,8 +96,8 @@ df_test['movieId'] = df_test['movieId'].map(id_row_num_map)
 
 user_train = df_train.groupby('userId')
 df_train_array = df_train.to_numpy(dtype='int')
-user_val = df_test.groupby('userId')
-df_val_array = df_test.to_numpy(dtype='int')
+user_test = df_test.groupby('userId')
+df_test_array = df_test.to_numpy(dtype='int')
 
 
 # starts to training a classifier for each user
@@ -107,7 +107,7 @@ final = np.zeros((0,))
 for n in range(1,user_num+1):
     
     train = df_train_array[user_train.groups[n]]   
-    val = df_val_array[user_val.groups[n]]   
+    test = df_test_array[user_test.groups[n]]   
 
     
     X = mov_fea[train[:,1]]
@@ -115,22 +115,21 @@ for n in range(1,user_num+1):
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=10)
-    #clf = RandomForestClassifier(max_depth=4, n_estimators=100)
-    clf = MLPClassifier()
+    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
     clf.fit(X, y) 
     
 
-    Z = mov_fea[val[:,1]]
+    Z = mov_fea[test[:,1]]
     final = np.concatenate((final,clf.predict(Z))) 
     if n%100 ==0:
         print(n)
  
-truth = df_test.to_numpy(dtype='float')[0:final.shape[0],2]
-fpr, tpr, thresholds = metrics.roc_curve(truth, final)
-print(metrics.auc(fpr, tpr))  
+#truth = df_test.to_numpy(dtype='float')[0:final.shape[0],2]
+#fpr, tpr, thresholds = metrics.roc_curve(truth, final)
+#print(metrics.auc(fpr, tpr))  
 
-#with open('data/kaggle_sample_submission.csv') as csvfile:
-#    df_res = pd.read_csv(csvfile)
-#    df_res['rating'] = pd.Series(final)
-#    
-#df_res.to_csv('data/kaggle_sample_submission.csv', index=False)
+with open('data/kaggle_sample_submission.csv') as csvfile:
+    df_res = pd.read_csv(csvfile)
+    df_res['rating'] = pd.Series(final)
+    
+df_res.to_csv('data/kaggle_sample_submission.csv', index=False)
