@@ -35,7 +35,7 @@ with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
     df_movie = pd.read_csv(csvfile)
     mov_id = df_movie['movieId'].to_numpy(dtype='int')
     all_tag = df_movie['genres'].tolist()
-    mov_id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(27278))))
+    mov_id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(movie_num))))
 
 #genres
 with open('data/genome-tags.csv') as csvfile:
