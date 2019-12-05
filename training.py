@@ -35,16 +35,17 @@ with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
     df_movie = pd.read_csv(csvfile)
     mov_id = df_movie['movieId'].to_numpy(dtype='int')
     all_tag = df_movie['genres'].tolist()
-    mov_id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(movie_num))))
+    id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(movie_num))))
 
-#genres
+# genres
 with open('data/genome-tags.csv') as csvfile:
     df = pd.read_csv(csvfile)
     tag_id_map = dict(zip(df['tag'].tolist(), df['tagId'].tolist()))
 
+# movie feature matrix
 mov_fea = np.zeros((movie_num,tags_num))
 
-#adds genres to movies without tags
+# adds genres to movies without tags
 for i in range(movie_num):
     tag_list = all_tag[i].split('|')
     for j in [tag_id_map[tag.lower()]-1 for tag in tag_list if tag.lower() in tag_id_map]:
@@ -99,6 +100,7 @@ df_val_array = df_val.to_numpy(dtype='int')
 # we want to save memory
 final = np.zeros((0,))
 for n in range(1,user_num+1):
+    
     train = df_train_array[user_train.groups[n]]   
     val = df_val_array[user_val.groups[n]]   
 
@@ -121,8 +123,8 @@ truth = df_val.to_numpy(dtype='float')[0:final.shape[0],2]
 fpr, tpr, thresholds = metrics.roc_curve(truth, final)
 print(metrics.auc(fpr, tpr))  
 
-with open('data/kaggle_sample_submission.csv') as csvfile:
-    df_res = pd.read_csv(csvfile)
-    df_res['rating'] = pd.Series(final)
-    
-df_res.to_csv('data/kaggle_sample_submission.csv', index=False)
+#with open('data/kaggle_sample_submission.csv') as csvfile:
+#    df_res = pd.read_csv(csvfile)
+#    df_res['rating'] = pd.Series(final)
+#    
+#df_res.to_csv('data/kaggle_sample_submission.csv', index=False)
