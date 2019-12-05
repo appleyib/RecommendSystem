@@ -26,7 +26,7 @@ for i in range(1,len(sys.argv)):
 movie_num = 27278
 tags_num = 1128
 user_num = 138493
-# user_num = 1000
+#user_num = 1000
 
 # loads files
 print("Loading files...")
@@ -66,7 +66,7 @@ with open('data/train_ratings_binary.csv') as csvfile:
 with open('data/val_ratings_binary.csv') as csvfile:
     df_val = pd.read_csv(csvfile)   
     
-df_train = pd.concat([df_train, df_val])
+df_train = pd.concat([df_train, df_val], ignore_index=True)
 
 # test data
 with open('data/test_ratings.csv') as csvfile:
