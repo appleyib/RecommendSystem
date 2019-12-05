@@ -25,8 +25,8 @@ for i in range(1,len(sys.argv)):
 # movie nums
 movie_num = 27278
 tags_num = 1128
-# user_num = 138493
-user_num = 1000
+user_num = 138493
+# user_num = 1000
 
 # loads files
 print("Loading files...")
@@ -35,15 +35,17 @@ with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
     df_movie = pd.read_csv(csvfile)
     mov_id = df_movie['movieId'].to_numpy(dtype='int')
     all_tag = df_movie['genres'].tolist()
+    id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(movie_num))))
 
-#genres
+# genres
 with open('data/genome-tags.csv') as csvfile:
     df = pd.read_csv(csvfile)
     tag_id_map = dict(zip(df['tag'].tolist(), df['tagId'].tolist()))
 
+# movie feature matrix
 mov_fea = np.zeros((movie_num,tags_num))
 
-#adds genres to movies without tags
+# adds genres to movies without tags
 for i in range(movie_num):
     tag_list = all_tag[i].split('|')
     for j in [tag_id_map[tag.lower()]-1 for tag in tag_list if tag.lower() in tag_id_map]:
@@ -61,10 +63,15 @@ mov_fea[np.argwhere(np.isin(mov_id, mov_id_with_tags))] = mov_rel
 with open('data/train_ratings_binary.csv') as csvfile:
     df_train = pd.read_csv(csvfile)
 
-# test data
-# with open('data/test_ratings.csv') as csvfile:
 with open('data/val_ratings_binary.csv') as csvfile:
-    df_val = pd.read_csv(csvfile)  
+    df_val = pd.read_csv(csvfile)   
+    
+df_train = pd.concat([df_train, df_val])
+
+# test data
+with open('data/test_ratings.csv') as csvfile:
+#with open('data/val_ratings_binary.csv') as csvfile:
+    df_test = pd.read_csv(csvfile)  
 
 print("Loading file complete, now generating/assembling feats...")
 
@@ -84,33 +91,42 @@ else:
     print("Assembling feats done!")
 
 
+df_train['movieId'] = df_train['movieId'].map(id_row_num_map)
+df_test['movieId'] = df_test['movieId'].map(id_row_num_map)
+
+user_train = df_train.groupby('userId')
+df_train_array = df_train.to_numpy(dtype='int')
+user_test = df_test.groupby('userId')
+df_test_array = df_test.to_numpy(dtype='int')
+
+
 # starts to training a classifier for each user
 # will predict for samples in the test case as well since
 # we want to save memory
 final = np.zeros((0,))
 for n in range(1,user_num+1):
-    user_train = df_train[df_train['userId']==n].to_numpy(dtype='int')   
-    user_val = df_val[df_val['userId']==n].to_numpy(dtype='int')   
+    
+    train = df_train_array[user_train.groups[n]]   
+    test = df_test_array[user_test.groups[n]]   
 
     
-    X = np.squeeze(mov_fea[np.argwhere(np.isin(mov_id, user_train[:,1]))])
-    y = user_train[:,2]
+    X = mov_fea[train[:,1]]
+    y = train[:,2]
     
     #clf = KNeighborsClassifier(n_neighbors=10)
-    #clf = tree.DecisionTreeClassifier(max_depth=5)
-    #clf = RandomForestClassifier(max_depth=4, n_estimators=100)
-    clf = MLPClassifier(solver="adam", learning_rate="adaptive", learning_rate_init=0.01, activation="identity")
+    #clf = tree.DecisionTreeClassifier(max_depth=10)
+    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
     clf.fit(X, y) 
     
 
-    Z = np.squeeze(mov_fea[np.argwhere(np.isin(mov_id, user_val[:,1]))])
+    Z = mov_fea[test[:,1]]
     final = np.concatenate((final,clf.predict(Z))) 
     if n%100 ==0:
         print(n)
  
-truth = df_val.to_numpy(dtype='float')[0:final.shape[0],2]
-fpr, tpr, thresholds = metrics.roc_curve(truth, final)
-print(metrics.auc(fpr, tpr))  
+#truth = df_test.to_numpy(dtype='float')[0:final.shape[0],2]
+#fpr, tpr, thresholds = metrics.roc_curve(truth, final)
+#print(metrics.auc(fpr, tpr))  
 
 with open('data/kaggle_sample_submission.csv') as csvfile:
     df_res = pd.read_csv(csvfile)
