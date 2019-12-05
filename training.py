@@ -98,7 +98,8 @@ for n in range(1,user_num+1):
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=5)
-    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    #clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    clf = MLPClassifier(solver="adam", learning_rate="adaptive", learning_rate_init=0.01, activation="identity")
     clf.fit(X, y) 
     
 
