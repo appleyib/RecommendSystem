@@ -30,8 +30,20 @@ print("Loading files...")
 with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
     df_movie = pd.read_csv(csvfile)
     mov_id = df_movie['movieId'].to_numpy(dtype='int')
+    all_tag = df_movie['genres'].tolist()
+
+#genres
+with open('data/genome-tags.csv') as csvfile:
+    df = pd.read_csv(csvfile)
+    tag_id_map = dict(zip(df['tag'].tolist(), df['tagId'].tolist()))
 
 mov_fea = np.zeros((movie_num,tags_num))
+
+#adds genres to movies without tags
+for i in range(movie_num):
+    tag_list = all_tag[i].split('|')
+    for j in [tag_id_map[tag.lower()]-1 for tag in tag_list if tag.lower() in tag_id_map]:
+        mov_fea[i, j] = 1
 
 # genome scores
 with open('data/genome-scores.csv') as csvfile:
