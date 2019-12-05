@@ -63,10 +63,15 @@ mov_fea[np.argwhere(np.isin(mov_id, mov_id_with_tags))] = mov_rel
 with open('data/train_ratings_binary.csv') as csvfile:
     df_train = pd.read_csv(csvfile)
 
-# test data
-# with open('data/test_ratings.csv') as csvfile:
 with open('data/val_ratings_binary.csv') as csvfile:
-    df_val = pd.read_csv(csvfile)  
+    df_val = pd.read_csv(csvfile)   
+    
+df_train = pd.concat([df_train, df_val])
+
+# test data
+with open('data/test_ratings.csv') as csvfile:
+#with open('data/val_ratings_binary.csv') as csvfile:
+    df_test = pd.read_csv(csvfile)  
 
 print("Loading file complete, now generating/assembling feats...")
 
@@ -87,12 +92,12 @@ else:
 
 
 df_train['movieId'] = df_train['movieId'].map(id_row_num_map)
-df_val['movieId'] = df_val['movieId'].map(id_row_num_map)
+df_test['movieId'] = df_test['movieId'].map(id_row_num_map)
 
 user_train = df_train.groupby('userId')
 df_train_array = df_train.to_numpy(dtype='int')
-user_val = df_val.groupby('userId')
-df_val_array = df_val.to_numpy(dtype='int')
+user_val = df_test.groupby('userId')
+df_val_array = df_test.to_numpy(dtype='int')
 
 
 # starts to training a classifier for each user
@@ -109,8 +114,9 @@ for n in range(1,user_num+1):
     y = train[:,2]
     
     #clf = KNeighborsClassifier(n_neighbors=10)
-    #clf = tree.DecisionTreeClassifier(max_depth=5)
-    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    #clf = tree.DecisionTreeClassifier(max_depth=10)
+    #clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    clf = MLPClassifier()
     clf.fit(X, y) 
     
 
@@ -119,7 +125,7 @@ for n in range(1,user_num+1):
     if n%100 ==0:
         print(n)
  
-truth = df_val.to_numpy(dtype='float')[0:final.shape[0],2]
+truth = df_test.to_numpy(dtype='float')[0:final.shape[0],2]
 fpr, tpr, thresholds = metrics.roc_curve(truth, final)
 print(metrics.auc(fpr, tpr))  
 
