@@ -35,6 +35,7 @@ with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
     df_movie = pd.read_csv(csvfile)
     mov_id = df_movie['movieId'].to_numpy(dtype='int')
     all_tag = df_movie['genres'].tolist()
+    mov_id_row_num_map = dict(zip(df_movie['movieId'].tolist(), list(range(27278))))
 
 #genres
 with open('data/genome-tags.csv') as csvfile:
@@ -84,17 +85,26 @@ else:
     print("Assembling feats done!")
 
 
+df_train['movieId'] = df_train['movieId'].map(mov_id_row_num_map)
+df_val['movieId'] = df_val['movieId'].map(mov_id_row_num_map)
+
+user_train = df_train.groupby('userId')
+df_train_array = df_train.to_numpy(dtype='int')
+user_val = df_val.groupby('userId')
+df_val_array = df_val.to_numpy(dtype='int')
+
+
 # starts to training a classifier for each user
 # will predict for samples in the test case as well since
 # we want to save memory
 final = np.zeros((0,))
 for n in range(1,user_num+1):
-    user_train = df_train[df_train['userId']==n].to_numpy(dtype='int')   
-    user_val = df_val[df_val['userId']==n].to_numpy(dtype='int')   
+    train = df_train_array[user_train.groups[n]]   
+    val = df_val_array[user_val.groups[n]]   
 
     
-    X = np.squeeze(mov_fea[np.argwhere(np.isin(mov_id, user_train[:,1]))])
-    y = user_train[:,2]
+    X = mov_fea[train[:,1]]
+    y = train[:,2]
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=5)
@@ -102,7 +112,7 @@ for n in range(1,user_num+1):
     clf.fit(X, y) 
     
 
-    Z = np.squeeze(mov_fea[np.argwhere(np.isin(mov_id, user_val[:,1]))])
+    Z = mov_fea[val[:,1]]
     final = np.concatenate((final,clf.predict(Z))) 
     if n%100 ==0:
         print(n)
