@@ -28,8 +28,8 @@ user_num = 138493
 print("Loading files...")
 # movies
 with open('data/movies.csv', encoding='gb18030',errors='ignore') as csvfile:
-    df = pd.read_csv(csvfile)
-    mov_id = df['movieId'].to_numpy(dtype='int')
+    df_movie = pd.read_csv(csvfile)
+    mov_id = df_movie['movieId'].to_numpy(dtype='int')
 
 mov_fea = np.zeros((movie_num,tags_num))
 
@@ -54,7 +54,7 @@ print("Loading file complete, now generating/assembling feats...")
 if collab_feat_num is None:
     print("Running in non-collaborative filtering mode, collab feats will not be assembled.")
 else:
-    mov_fea = assembleFeats(df, df_train, mov_fea, collab_feat_num)
+    mov_fea = assembleFeats(df_movie, df_train, mov_fea, collab_feat_num)
 
 # starts to training a classifier for each user
 # will predict for samples in the test case as well since
@@ -70,7 +70,7 @@ for n in range(1,user_num+1):
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=5)
-    clf = RandomForestClassifier(max_depth=2, n_estimators=20)
+    clf = RandomForestClassifier(max_depth=5, n_estimators=20)
     clf.fit(X, y) 
     
 

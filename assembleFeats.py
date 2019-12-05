@@ -22,11 +22,12 @@ def assembleFeats(df_movie, df_train, mov_fea, collab_feat_num):
 	# defines svd classifier
 	svd = TruncatedSVD(n_components=collab_feat_num, algorithm="arpack")
 	# use svd to decompose collab feats
-	latent_collab_feats = pd.DataFrame(svd.fit_transform(all_collab_filter), index=all_collab_filter.index.tolist())
+	latent_collab_feats = pd.DataFrame(svd.fit_transform(all_collab_filter), index=all_collab_filter.index)
 	# print(latent_collab_feats.shape)
 	all_latent_feats_include_non_rated = pd.merge(df_movie['movieId'], latent_collab_feats, left_on='movieId', right_index=True, how='left').fillna(0).to_numpy(dtype='float')
 	print("Tag feats shape is:", mov_fea.shape)
 	print("Latent collab feats shape is:", all_latent_feats_include_non_rated.shape)
+	print(all_latent_feats_include_non_rated)
 	np.save(latent_feats_file_name, all_latent_feats_include_non_rated)
 	# assembles!
 	assembledFeats = np.concatenate((mov_fea, all_latent_feats_include_non_rated), axis = 1)
