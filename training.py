@@ -86,8 +86,8 @@ else:
     print("Assembling feats done!")
 
 
-df_train['movieId'] = df_train['movieId'].map(mov_id_row_num_map)
-df_val['movieId'] = df_val['movieId'].map(mov_id_row_num_map)
+df_train['movieId'] = df_train['movieId'].map(id_row_num_map)
+df_val['movieId'] = df_val['movieId'].map(id_row_num_map)
 
 user_train = df_train.groupby('userId')
 df_train_array = df_train.to_numpy(dtype='int')
