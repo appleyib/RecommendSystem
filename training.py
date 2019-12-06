@@ -10,10 +10,12 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from assembleFeats import assembleFeats, reduceContentFeats
+from superHybrid import superHybrid
 
 l = len(sys.argv)
 collab_feat_num = None
 cont_feat_num = None
+superHybridFlag = False
 
 # parses arguments
 for i in range(1,len(sys.argv)):
@@ -21,12 +23,15 @@ for i in range(1,len(sys.argv)):
         collab_feat_num = int(sys.argv[i+1])
     elif sys.argv[i] == "-contn":
         cont_feat_num = int(sys.argv[i+1])
+    elif sys.argv[i] == "-superHybrid":
+        superHybridFlag = True
+
 
 # movie nums
 movie_num = 27278
 tags_num = 1128
 user_num = 138493
-#user_num = 1000
+# user_num = 1000
 
 # loads files
 print("Loading files...")
@@ -73,7 +78,13 @@ with open('data/test_ratings.csv') as csvfile:
 #with open('data/val_ratings_binary.csv') as csvfile:
     df_test = pd.read_csv(csvfile)  
 
+if superHybridFlag is True:
+    print("Loading file complete. Running Yizhao Wang's super stupid hybrid model...")
+    superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num)
+    exit(0)
+
 print("Loading file complete, now generating/assembling feats...")
+
 
 # uses SVD tu reduce the dimensionality of content feats (mov_fea)
 if cont_feat_num is None:
@@ -115,7 +126,7 @@ for n in range(1,user_num+1):
     
     #clf = KNeighborsClassifier(n_neighbors=10)
     #clf = tree.DecisionTreeClassifier(max_depth=10)
-    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    clf = RandomForestClassifier(max_depth=4, n_estimators=200)
     clf.fit(X, y) 
     
 
