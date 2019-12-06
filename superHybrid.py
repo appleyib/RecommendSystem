@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 
-def superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num):
+def superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num=1000):
 	df_train = df_train[df_train["userId"]<=user_num]
 
 	# to calculate temp accuracy!
@@ -25,11 +25,11 @@ def superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num):
 	df_train = pd.merge(df_train, df_user_movie_rat, left_on="userId", right_index=True, how="left")
 	y = df_train["rating"]
 	print(df_train)
-	df_train.drop(["rating", "movieId", "userId"], axis = 1, inplace=True)
+	df_train.drop(["rating", "movieId"], axis = 1, inplace=True)
 	print("columns of training datasets:")
 	print(df_train.columns)
 	print("training...")
-	clf = RandomForestClassifier(max_depth=100, n_estimators=100)
+	clf = RandomForestClassifier(max_depth=10, n_estimators=100)
 	clf.fit(df_train, y)
 
 	# df_test['movieId'] = df_test['movieId'].map(id_row_num_map)
@@ -42,7 +42,7 @@ def superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num):
 	df_test=pd.merge(df_test, df_movie, left_on="movieId", right_index=True, how="left")
 	df_test=pd.merge(df_test, df_user_movie_rat, on="userId", how="left")
 	truth = df_test["rating"]
-	df_test.drop(["userId", "movieId", "rating"], axis=1, inplace=True)
+	df_test.drop(["movieId", "rating"], axis=1, inplace=True)
 	print("columns of test datasets:")
 	print(df_test.columns)
 	print("predicting...")

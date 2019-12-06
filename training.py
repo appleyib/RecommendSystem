@@ -70,18 +70,19 @@ with open('data/train_ratings_binary.csv') as csvfile:
 
 with open('data/val_ratings_binary.csv') as csvfile:
     df_val = pd.read_csv(csvfile)   
-    
-df_train = pd.concat([df_train, df_val], ignore_index=True)
+
 
 # test data
 with open('data/test_ratings.csv') as csvfile:
 #with open('data/val_ratings_binary.csv') as csvfile:
-    df_test = pd.read_csv(csvfile)  
+    df_test = pd.read_csv(csvfile)
 
 if superHybridFlag is True:
     print("Loading file complete. Running Yizhao Wang's super stupid hybrid model...")
-    superHybrid(mov_fea, mov_id, df_train, df_test, df_val, user_num)
+    superHybrid(mov_fea, mov_id, df_train, df_test, df_val)
     exit(0)
+
+df_train = pd.concat([df_train, df_val], ignore_index=True)
 
 print("Loading file complete, now generating/assembling feats...")
 
