@@ -113,9 +113,9 @@ for n in range(1,user_num+1):
     X = mov_fea[train[:,1]]
     y = train[:,2]
     
-    #clf = KNeighborsClassifier(n_neighbors=10)
-    #clf = tree.DecisionTreeClassifier(max_depth=10)
-    clf = RandomForestClassifier(max_depth=4, n_estimators=100)
+    clf = KNeighborsClassifier(n_neighbors=10)
+    #clf = tree.DecisionTreeClassifier(max_depth=20)
+    #clf = RandomForestClassifier(max_depth=4, n_estimators=100)
     clf.fit(X, y) 
     
 
@@ -137,4 +137,4 @@ with open('data/kaggle_sample_submission.csv') as csvfile:
     df_res = pd.read_csv(csvfile)
     df_res['rating'] = pd.Series(final)
     
-df_res.to_csv('data/kaggle_sample_submission.csv', index=False)
+df_res.to_csv('data/kaggle_sample_submission4.csv', index=False)
