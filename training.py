@@ -120,7 +120,12 @@ for n in range(1,user_num+1):
     
 
     Z = mov_fea[test[:,1]]
-    final = np.concatenate((final,clf.predict(Z))) 
+    if clf.predict_proba(Z).shape[1] == 1:
+        pred = clf.predict(Z)*clf.predict_proba(Z)[:,0]
+    else:
+        pred = clf.predict_proba(Z)[:,1]
+    #pred = clf.predict(Z)
+    final = np.concatenate((final,pred)) 
     if n%100 ==0:
         print(n)
  
